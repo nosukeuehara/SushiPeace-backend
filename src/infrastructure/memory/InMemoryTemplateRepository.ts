@@ -28,6 +28,7 @@ export class InMemoryTemplateRepository implements TemplateRepository {
   }
 
   async findById(id: string): Promise<PlateTemplate | null> {
+    console.log(`Searching for template with id: ${id}`);
     return PLATE_TEMPLATES.find(template => template.id === id) || null;
   }
 }
