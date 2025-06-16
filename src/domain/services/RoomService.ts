@@ -9,7 +9,7 @@ export class RoomService {
     }, {} as Record<string, number>);
   }
 
-  static isRoomExpired(createdAt: Date, hoursLimit: number = 2): boolean {
+  static isRoomExpired(createdAt: Date, hoursLimit: number = 24 * 30): boolean {
     const now = new Date();
     const limitMs = hoursLimit * 60 * 60 * 1000;
     return now.getTime() - createdAt.getTime() > limitMs;
