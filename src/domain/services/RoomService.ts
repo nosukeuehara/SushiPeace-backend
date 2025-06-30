@@ -2,12 +2,14 @@ import { Member } from '../entities/Room';
 import { PlateTemplate } from '../entities/PlateTemplate';
 
 export class RoomService {
-  static createInitialCounts(template: PlateTemplate): Record<string, number> {
-    return Object.keys(template.prices).reduce((acc, color) => {
-      acc[color] = 0;
+  static createInitialCounts(template: PlateTemplate | null): Record<string, number> {
+    if (!template) return {};
+    return Object.keys(template.prices).reduce((acc, plate) => {
+      acc[plate] = 0;
       return acc;
     }, {} as Record<string, number>);
   }
+
 
   static isRoomExpired(createdAt: Date, hoursLimit: number = 24 * 30): boolean {
     const now = new Date();

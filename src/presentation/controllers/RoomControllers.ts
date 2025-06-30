@@ -15,7 +15,10 @@ export class RoomController {
       const { groupName, members, templateId } = req.body;
 
       if (!templateId) {
-        res.status(400).json({ error: "テンプレートが選択されていません" });
+        const result = await this.createRoomUseCase.execute({
+          groupName,
+          members,
+        });
         return;
       }
 

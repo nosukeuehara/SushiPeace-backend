@@ -13,26 +13,55 @@ export class SocketController {
 
   handleConnection(io: Server, socket: Socket): void {
     socket.on('join', async ({ roomId, userId }) => {
-      await this.handleJoin(socket, roomId, userId);
+      await this.handleJoin(io, socket, roomId, userId);
     });
 
     socket.on('count', async ({ roomId, userId, color, remove }) => {
       await this.handleCount(io, roomId, userId, color, remove);
     });
+
+    socket.on("updateTemplate", async ({ roomId, prices }) => {
+      const room = await this.roomRepository.findById(roomId);
+      if (!room) return;
+      console.log("Room found:", room);
+      const updatedRoom = {
+        ...room,
+        templateId: room.templateId,
+        templateData: prices,
+      };
+
+      await this.roomRepository.update(room.id, updatedRoom);
+      const roomState = this.roomStateRepository.getRoomState(roomId);
+      if (!roomState) return;
+      const members = RoomService.recordToMembers(roomState);
+      io.to(roomId).emit("sync", {
+        members,
+        templateId: updatedRoom.templateData ?? {},
+      });
+    });
   }
 
-  private async handleJoin(socket: Socket, roomId: string, userId: string): Promise<void> {
+  private async handleJoin(io: Server, socket: Socket, roomId: string, userId: string): Promise<void> {
     try {
-      // メモリストアにルーム情報がなければFirestoreから復元
-      if (!this.roomStateRepository.getRoomState(roomId)) {
-        const room = await this.roomRepository.findById(roomId);
-        if (!room) return;
+      let room = await this.roomRepository.findById(roomId);
+      if (!room) return;
 
+      // メモリに状態がなければ復元
+      if (!this.roomStateRepository.getRoomState(roomId)) {
         const membersRecord = RoomService.membersToRecord(room.members);
         this.roomStateRepository.setRoomState(roomId, membersRecord);
       }
 
       socket.join(roomId);
+
+      // 現在のルーム状態を送信（メンバーとテンプレートID）
+      const roomState = this.roomStateRepository.getRoomState(roomId);
+      if (!roomState) return;
+      const members = RoomService.recordToMembers(roomState);
+      io.to(roomId).emit('sync', {
+        members,
+        templateId: room.templateId ?? '',
+      });
     } catch (error) {
       console.error('Join error:', error);
     }
@@ -53,7 +82,14 @@ export class SocketController {
         remove,
       });
 
-      io.to(roomId).emit("sync", updatedMembers);
+      const room = await this.roomRepository.findById(roomId);
+      const templateId = room?.templateId ?? '';
+
+      io.to(roomId).emit("sync", {
+        members: updatedMembers,
+        templateId,
+      });
+
     } catch (error) {
       console.error('Count update error:', error);
     }

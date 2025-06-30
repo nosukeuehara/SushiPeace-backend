@@ -4,7 +4,7 @@ export interface CreateRoomDto {
     userId: string;
     name: string;
   }>;
-  templateId: string;
+  templateId?: string;
 }
 
 export interface CreateRoomResponseDto {
