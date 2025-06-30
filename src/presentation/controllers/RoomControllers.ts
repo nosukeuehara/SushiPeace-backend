@@ -14,26 +14,20 @@ export class RoomController {
     try {
       const { groupName, members, templateId } = req.body;
 
-      if (!templateId) {
-        const result = await this.createRoomUseCase.execute({
-          groupName,
-          members,
-        });
-        return;
-      }
-
       const result = await this.createRoomUseCase.execute({
         groupName,
         members,
-        templateId,
+        ...(templateId ? { templateId } : {}),
       });
 
-      res.json(result);
+      res.json(result); // ← ★共通で返す
     } catch (error) {
-      const message = error instanceof Error ? error.message : "ルーム作成中にエラーが発生しました";
+      const message =
+        error instanceof Error ? error.message : "ルーム作成中にエラーが発生しました";
       res.status(400).json({ error: message });
     }
   }
+
 
   async getRoom(req: Request, res: Response): Promise<void> {
     try {
