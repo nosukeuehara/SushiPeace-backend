@@ -23,7 +23,6 @@ export class SocketController {
     socket.on("updateTemplate", async ({ roomId, prices }) => {
       const room = await this.roomRepository.findById(roomId);
       if (!room) return;
-      console.log("Room found:", room);
       const updatedRoom = {
         ...room,
         templateId: room.templateId,
