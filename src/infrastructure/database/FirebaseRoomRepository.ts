@@ -10,8 +10,10 @@ export class FirebaseRoomRepository implements RoomRepository {
       groupName: room.groupName,
       members: room.members,
       templateId: room.templateId,
+      templateData: room.templateData ?? {},
       createdAt: room.createdAt,
     });
+
   }
 
   async findById(id: string): Promise<Room | null> {
@@ -24,8 +26,10 @@ export class FirebaseRoomRepository implements RoomRepository {
       groupName: data.groupName,
       members: data.members || [],
       templateId: data.templateId,
+      templateData: data.templateData ?? {},
       createdAt: data.createdAt?.toDate?.() || new Date(),
     };
+
   }
 
   async update(id: string, room: Partial<Room>): Promise<void> {

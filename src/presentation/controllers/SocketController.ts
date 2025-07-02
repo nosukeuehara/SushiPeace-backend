@@ -35,17 +35,17 @@ export class SocketController {
       const members = RoomService.recordToMembers(roomState);
       io.to(roomId).emit("sync", {
         members,
-        templateId: updatedRoom.templateData ?? {},
+        templateData: updatedRoom.templateData ?? {},
       });
+
     });
   }
 
   private async handleJoin(io: Server, socket: Socket, roomId: string, userId: string): Promise<void> {
     try {
-      let room = await this.roomRepository.findById(roomId);
+      const room = await this.roomRepository.findById(roomId);
       if (!room) return;
 
-      // メモリに状態がなければ復元
       if (!this.roomStateRepository.getRoomState(roomId)) {
         const membersRecord = RoomService.membersToRecord(room.members);
         this.roomStateRepository.setRoomState(roomId, membersRecord);
@@ -53,18 +53,18 @@ export class SocketController {
 
       socket.join(roomId);
 
-      // 現在のルーム状態を送信（メンバーとテンプレートID）
       const roomState = this.roomStateRepository.getRoomState(roomId);
       if (!roomState) return;
       const members = RoomService.recordToMembers(roomState);
       io.to(roomId).emit('sync', {
         members,
-        templateId: room.templateId ?? '',
+        templateData: room.templateData ?? {}, // ← ここを追加・修正
       });
     } catch (error) {
       console.error('Join error:', error);
     }
   }
+
 
   private async handleCount(
     io: Server,
