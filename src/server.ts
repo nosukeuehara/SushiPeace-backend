@@ -1,22 +1,22 @@
-import express from 'express';
-import { Server } from 'socket.io';
-import http from 'http';
-import cors from 'cors';
-import { db } from './infrastructure/config/firebase';
+import express from "express";
+import {Server} from "socket.io";
+import http from "http";
+import cors from "cors";
+import {db} from "./infrastructure/config/firebase";
 
 // Repositories
-import { FirebaseRoomRepository } from './infrastructure/database/FirebaseRoomRepository';
-import { InMemoryTemplateRepository } from './infrastructure/memory/InMemoryTemplateRepository';
-import { InMemoryRoomStateRepository } from './infrastructure/memory/InMemoryRoomStateRepository';
+import {FirebaseRoomRepository} from "./infrastructure/database/FirebaseRoomRepository";
+import {InMemoryTemplateRepository} from "./infrastructure/memory/InMemoryTemplateRepository";
+import {InMemoryRoomStateRepository} from "./infrastructure/memory/InMemoryRoomStateRepository";
 
 // Use Cases
-import { CreateRoomUseCase } from './application/usecases/CreateRoomUseCase';
-import { GetRoomUseCase } from './application/usecases/GetRoomUseCase';
-import { UpdateCountUseCase } from './application/usecases/UpdateCountUseCase';
+import {CreateRoomUseCase} from "./application/usecases/CreateRoomUseCase";
+import {GetRoomUseCase} from "./application/usecases/GetRoomUseCase";
+import {UpdateCountUseCase} from "./application/usecases/UpdateCountUseCase";
 
 // Controllers
-import { SocketController } from './presentation/controllers/SocketController';
-import { RoomController } from './presentation/controllers/RoomControllers';
+import {SocketController} from "./presentation/controllers/SocketController";
+import {RoomController} from "./presentation/controllers/RoomControllers";
 
 const app = express();
 app.use(cors());
@@ -24,7 +24,7 @@ app.use(express.json());
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: '*' },
+  cors: {origin: "*"},
 });
 
 // Dependencies
@@ -57,12 +57,12 @@ const socketController = new SocketController(
 );
 
 // Routes
-app.post('/api/room', (req, res) => roomController.createRoom(req, res));
-app.get('/api/room/:roomId', (req, res) => roomController.getRoom(req, res));
-app.get('/api/templates', (req, res) => roomController.getTemplates(req, res));
+app.post("/api/room", (req, res) => roomController.createRoom(req, res));
+app.get("/api/room/:roomId", (req, res) => roomController.getRoom(req, res));
+app.get("/api/templates", (req, res) => roomController.getTemplates(req, res));
 
 // Socket Events
-io.on('connection', (socket) => {
+io.on("connection", (socket) => {
   socketController.handleConnection(io, socket);
 });
 
