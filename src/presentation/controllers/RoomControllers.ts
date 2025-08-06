@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { CreateRoomUseCase } from '../../application/usecases/CreateRoomUseCase';
 import { GetRoomUseCase } from '../../application/usecases/GetRoomUseCase';
 import { TemplateRepository } from '../../domain/repositories/TemplateRepository';
+import { logger } from '../../infrastructure/logging/logger';
 
 export class RoomController {
   constructor(
@@ -22,6 +23,7 @@ export class RoomController {
 
       res.json(result); // ← ★共通で返す
     } catch (error) {
+      logger.error('Create room error:', error);
       const message =
         error instanceof Error ? error.message : "ルーム作成中にエラーが発生しました";
       res.status(400).json({ error: message });
@@ -35,6 +37,7 @@ export class RoomController {
       const room = await this.getRoomUseCase.execute(roomId);
       res.json(room);
     } catch (error) {
+      logger.error('Get room error:', error);
       const message = error instanceof Error ? error.message : "ルーム情報の取得に失敗しました";
       const status = message.includes('存在しません') ? 404 :
         message.includes('期限切れ') ? 410 : 500;
@@ -47,6 +50,7 @@ export class RoomController {
       const templates = await this.templateRepository.findAll();
       res.json(templates);
     } catch (error) {
+      logger.error('Get templates error:', error);
       res.status(500).json({ error: "テンプレート取得に失敗しました" });
     }
   }
