@@ -4,6 +4,7 @@ import {RoomStateRepository} from "../../domain/repositories/RoomStateRepository
 import {UpdateCountUseCase} from "../../application/usecases/UpdateCountUseCase";
 import {RoomService} from "../../domain/services/RoomService";
 import {logger} from "../../infrastructure/logging/logger";
+import {Member} from "../../domain/entities/Room";
 
 export class SocketController {
   constructor(
@@ -25,35 +26,41 @@ export class SocketController {
       const room = await this.roomRepository.findById(roomId);
       if (!room) return;
 
-      const currentTemplate = room.templateData ?? {};
-      const removedColors = Object.keys(currentTemplate).filter(
-        color => !(color in prices)
+      const rawTemplate = prices ?? {};
+      const numericEntries = Object.entries(rawTemplate).filter(
+        ([, value]) => typeof value === "number"
       );
+      const newTemplate = Object.fromEntries(numericEntries) as Record<string, number>;
+      const validColors = Object.keys(newTemplate);
 
       const roomState = this.roomStateRepository.getRoomState(roomId);
-      let members = room.members;
+      let members: Member[];
+
       if (roomState) {
         Object.values(roomState).forEach(member => {
-          for (const color of removedColors) {
-            delete member.counts[color];
-          }
+          member.counts = Object.fromEntries(
+            Object.entries(member.counts).filter(([color]) =>
+              validColors.includes(color)
+            )
+          );
         });
         this.roomStateRepository.setRoomState(roomId, roomState);
         members = RoomService.recordToMembers(roomState);
       } else {
-        members = room.members.map(m => {
-          const newCounts = { ...m.counts };
-          for (const color of removedColors) {
-            delete newCounts[color];
-          }
-          return { ...m, counts: newCounts };
-        });
+        members = room.members.map(m => ({
+          ...m,
+          counts: Object.fromEntries(
+            Object.entries(m.counts).filter(([color]) =>
+              validColors.includes(color)
+            )
+          ),
+        }));
       }
 
       const updatedRoom = {
         ...room,
         templateId: room.templateId,
-        templateData: prices,
+        templateData: validColors.length > 0 ? newTemplate : undefined,
         members,
       };
 
