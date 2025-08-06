@@ -24,16 +24,41 @@ export class SocketController {
     socket.on("updateTemplate", async ({roomId, prices}) => {
       const room = await this.roomRepository.findById(roomId);
       if (!room) return;
+
+      const currentTemplate = room.templateData ?? {};
+      const removedColors = Object.keys(currentTemplate).filter(
+        color => !(color in prices)
+      );
+
+      const roomState = this.roomStateRepository.getRoomState(roomId);
+      let members = room.members;
+      if (roomState) {
+        Object.values(roomState).forEach(member => {
+          for (const color of removedColors) {
+            delete member.counts[color];
+          }
+        });
+        this.roomStateRepository.setRoomState(roomId, roomState);
+        members = RoomService.recordToMembers(roomState);
+      } else {
+        members = room.members.map(m => {
+          const newCounts = { ...m.counts };
+          for (const color of removedColors) {
+            delete newCounts[color];
+          }
+          return { ...m, counts: newCounts };
+        });
+      }
+
       const updatedRoom = {
         ...room,
         templateId: room.templateId,
         templateData: prices,
+        members,
       };
 
       await this.roomRepository.update(room.id, updatedRoom);
-      const roomState = this.roomStateRepository.getRoomState(roomId);
-      if (!roomState) return;
-      const members = RoomService.recordToMembers(roomState);
+
       io.to(roomId).emit("sync", {
         members,
         templateData: updatedRoom.templateData ?? {},
