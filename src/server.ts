@@ -3,6 +3,8 @@ import {Server} from "socket.io";
 import http from "http";
 import cors from "cors";
 import {db} from "./infrastructure/config/firebase";
+import {logger} from "./infrastructure/logging/logger";
+import {errorHandler} from "./presentation/middleware/errorHandler";
 
 // Repositories
 import {FirebaseRoomRepository} from "./infrastructure/database/FirebaseRoomRepository";
@@ -61,6 +63,9 @@ app.post("/api/room", (req, res) => roomController.createRoom(req, res));
 app.get("/api/room/:roomId", (req, res) => roomController.getRoom(req, res));
 app.get("/api/templates", (req, res) => roomController.getTemplates(req, res));
 
+// Error handling middleware
+app.use(errorHandler);
+
 // Socket Events
 io.on("connection", (socket) => {
   socketController.handleConnection(io, socket);
@@ -69,5 +74,13 @@ io.on("connection", (socket) => {
 // 起動
 const PORT = 3000;
 server.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  logger.info(`🚀 Server running at http://localhost:${PORT}`);
+});
+
+process.on("uncaughtException", (err) => {
+  logger.error("Uncaught exception:", err);
+});
+
+process.on("unhandledRejection", (reason) => {
+  logger.error("Unhandled rejection:", reason);
 });

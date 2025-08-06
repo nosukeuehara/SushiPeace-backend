@@ -3,6 +3,7 @@ import {RoomRepository} from "../../domain/repositories/RoomRepository";
 import {RoomStateRepository} from "../../domain/repositories/RoomStateRepository";
 import {UpdateCountUseCase} from "../../application/usecases/UpdateCountUseCase";
 import {RoomService} from "../../domain/services/RoomService";
+import {logger} from "../../infrastructure/logging/logger";
 
 export class SocketController {
   constructor(
@@ -65,7 +66,7 @@ export class SocketController {
         templateData: room.templateData ?? {},
       });
     } catch (error) {
-      console.error("Join error:", error);
+      logger.error("Join error:", error);
     }
   }
 
@@ -92,7 +93,7 @@ export class SocketController {
         templateId,
       });
     } catch (error) {
-      console.error("Count update error:", error);
+      logger.error("Count update error:", error);
     }
   }
 }
