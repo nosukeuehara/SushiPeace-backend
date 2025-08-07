@@ -33,6 +33,10 @@ const corsOptions = {
 // CORSミドルウェアを適用
 app.use(cors(corsOptions));
 
+app.options("/api/room", cors(corsOptions));
+app.options("/api/room/:roomId", cors(corsOptions));
+app.options("/api/templates", cors(corsOptions));
+
 app.use(express.json());
 
 // サーバー & Socket.IO
