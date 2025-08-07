@@ -1,9 +1,18 @@
-import { initializeApp, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-import serviceAccount from '../../../serviceAccountKey.json';
+import {
+  initializeApp,
+  applicationDefault,
+  cert,
+  getApps,
+} from "firebase-admin/app";
+import {getFirestore} from "firebase-admin/firestore";
 
-initializeApp({
-  credential: cert(serviceAccount as any),
-});
+if (getApps().length === 0) {
+  initializeApp({
+    credential:
+      process.env.NODE_ENV === "production"
+        ? applicationDefault()
+        : cert(require("../../../serviceAccountKey.json")),
+  });
+}
 
 export const db = getFirestore();
