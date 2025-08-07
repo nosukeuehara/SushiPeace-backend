@@ -58,6 +58,15 @@ const socketController = new SocketController(
   updateCountUseCase
 );
 
+// cors設定
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://sushi-peace.web.app"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type"],
+  })
+);
+
 // Routes
 app.post("/api/room", (req, res) => roomController.createRoom(req, res));
 app.get("/api/room/:roomId", (req, res) => roomController.getRoom(req, res));
