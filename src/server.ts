@@ -21,21 +21,25 @@ import {SocketController} from "./presentation/controllers/SocketController";
 import {RoomController} from "./presentation/controllers/RoomControllers";
 
 const app = express();
-// cors設定
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "https://sushi-peace.web.app"],
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    allowedHeaders: "Content-Type",
-  })
-);
+
+// 🔧 CORS設定（Cloud Run対応）
+const allowedOrigins = ["https://sushi-peace.web.app", "http://localhost:5173"];
+const corsOptions = {
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
+};
+
+// CORSミドルウェアを適用
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
+// サーバー & Socket.IO
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["https://sushi-peace.web.app", "http://localhost:5173"],
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   },
 });
