@@ -72,7 +72,7 @@ io.on("connection", (socket) => {
 });
 
 // 起動
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   logger.info(`🚀 Server running at http://localhost:${PORT}`);
 });
