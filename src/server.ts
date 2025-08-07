@@ -30,6 +30,8 @@ app.use(
   })
 );
 
+app.options(/^\/.*$/, cors());
+
 app.use(express.json());
 
 const server = http.createServer(app);
