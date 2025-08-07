@@ -36,7 +36,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: ["https://sushi-peace.web.app", "http://localhost:5173"],
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   },
 });
 
