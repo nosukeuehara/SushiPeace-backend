@@ -30,14 +30,17 @@ export class SocketController {
       const numericEntries = Object.entries(rawTemplate).filter(
         ([, value]) => typeof value === "number"
       );
-      const newTemplate = Object.fromEntries(numericEntries) as Record<string, number>;
+      const newTemplate = Object.fromEntries(numericEntries) as Record<
+        string,
+        number
+      >;
       const validColors = Object.keys(newTemplate);
 
       const roomState = this.roomStateRepository.getRoomState(roomId);
       let members: Member[];
 
       if (roomState) {
-        Object.values(roomState).forEach(member => {
+        Object.values(roomState).forEach((member) => {
           member.counts = Object.fromEntries(
             Object.entries(member.counts).filter(([color]) =>
               validColors.includes(color)
@@ -47,7 +50,7 @@ export class SocketController {
         this.roomStateRepository.setRoomState(roomId, roomState);
         members = RoomService.recordToMembers(roomState);
       } else {
-        members = room.members.map(m => ({
+        members = room.members.map((m) => ({
           ...m,
           counts: Object.fromEntries(
             Object.entries(m.counts).filter(([color]) =>
