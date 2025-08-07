@@ -21,7 +21,14 @@ import {SocketController} from "./presentation/controllers/SocketController";
 import {RoomController} from "./presentation/controllers/RoomControllers";
 
 const app = express();
-app.use(cors());
+// cors設定
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://sushi-peace.web.app"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json());
 
 const server = http.createServer(app);
@@ -56,15 +63,6 @@ const socketController = new SocketController(
   roomRepository,
   roomStateRepository,
   updateCountUseCase
-);
-
-// cors設定
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "https://sushi-peace.web.app"],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
 );
 
 // Routes
