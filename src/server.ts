@@ -26,11 +26,9 @@ app.use(
   cors({
     origin: ["http://localhost:5173", "https://sushi-peace.web.app"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type"],
   })
 );
-
-app.options(/^\/.*$/, cors());
 
 app.use(express.json());
 
