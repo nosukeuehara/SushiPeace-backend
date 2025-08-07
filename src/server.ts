@@ -22,14 +22,7 @@ import {RoomController} from "./presentation/controllers/RoomControllers";
 
 const app = express();
 // cors設定
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "https://sushi-peace.web.app"],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type"],
-    credentials: false,
-  })
-);
+app.use(cors());
 
 app.use(express.json());
 
