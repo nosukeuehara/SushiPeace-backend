@@ -5,6 +5,7 @@ import {UpdateCountUseCase} from "@/application/usecases/UpdateCountUseCase";
 import {RoomService} from "@/domain/services/RoomService";
 import {logger} from "@/infrastructure/logging/logger";
 import {Member} from "@/domain/entities/Room";
+import {CountEvent, JoinEvent, UpdateTemplateEvent} from "@/shared";
 
 export class SocketController {
   constructor(
@@ -14,66 +15,69 @@ export class SocketController {
   ) {}
 
   handleConnection(io: Server, socket: Socket): void {
-    socket.on("join", async ({roomId, userId}) => {
+    socket.on("join", async ({roomId, userId}: JoinEvent) => {
       await this.handleJoin(io, socket, roomId, userId);
     });
 
-    socket.on("count", async ({roomId, userId, color, remove}) => {
+    socket.on("count", async ({roomId, userId, color, remove}: CountEvent) => {
       await this.handleCount(io, roomId, userId, color, remove);
     });
 
-    socket.on("updateTemplate", async ({roomId, prices}) => {
-      const room = await this.roomRepository.findById(roomId);
-      if (!room) return;
+    socket.on(
+      "updateTemplate",
+      async ({roomId, prices}: UpdateTemplateEvent) => {
+        const room = await this.roomRepository.findById(roomId);
+        if (!room) return;
 
-      const rawTemplate = prices ?? {};
-      const numericEntries = Object.entries(rawTemplate).filter(
-        ([, value]) => typeof value === "number"
-      );
-      const newTemplate = Object.fromEntries(numericEntries) as Record<
-        string,
-        number
-      >;
-      const validColors = Object.keys(newTemplate);
+        const rawTemplate = prices ?? {};
+        const numericEntries = Object.entries(rawTemplate).filter(
+          ([, value]) => typeof value === "number"
+        );
+        const newTemplate = Object.fromEntries(numericEntries) as Record<
+          string,
+          number
+        >;
+        const validColors = Object.keys(newTemplate);
 
-      const roomState = this.roomStateRepository.getRoomState(roomId);
-      let members: Member[];
+        const roomState = this.roomStateRepository.getRoomState(roomId);
+        let members: Member[];
 
-      if (roomState) {
-        Object.values(roomState).forEach((member) => {
-          member.counts = Object.fromEntries(
-            Object.entries(member.counts).filter(([color]) =>
-              validColors.includes(color)
-            )
-          );
+        if (roomState) {
+          Object.values(roomState).forEach((member) => {
+            member.counts = Object.fromEntries(
+              Object.entries(member.counts).filter(([color]) =>
+                validColors.includes(color)
+              )
+            );
+          });
+          this.roomStateRepository.setRoomState(roomId, roomState);
+          members = RoomService.recordToMembers(roomState);
+        } else {
+          members = room.members.map((m) => ({
+            ...m,
+            counts: Object.fromEntries(
+              Object.entries(m.counts).filter(([color]) =>
+                validColors.includes(color)
+              )
+            ),
+          }));
+        }
+
+        const updatedRoom = {
+          ...room,
+          templateId: validColors.length > 0 ? room.templateId : "",
+          templateData: validColors.length > 0 ? newTemplate : {},
+          members,
+        };
+
+        await this.roomRepository.update(room.id, updatedRoom);
+
+        io.to(roomId).emit("sync", {
+          members,
+          templateData: updatedRoom.templateData ?? {},
         });
-        this.roomStateRepository.setRoomState(roomId, roomState);
-        members = RoomService.recordToMembers(roomState);
-      } else {
-        members = room.members.map((m) => ({
-          ...m,
-          counts: Object.fromEntries(
-            Object.entries(m.counts).filter(([color]) =>
-              validColors.includes(color)
-            )
-          ),
-        }));
       }
-
-      const updatedRoom = {
-        ...room,
-        templateId: validColors.length > 0 ? room.templateId : "",
-        templateData: validColors.length > 0 ? newTemplate : {},
-        members,
-      };
-
-      await this.roomRepository.update(room.id, updatedRoom);
-
-      io.to(roomId).emit("sync", {
-        members,
-        templateData: updatedRoom.templateData ?? {},
-      });
-    });
+    );
   }
 
   private async handleJoin(

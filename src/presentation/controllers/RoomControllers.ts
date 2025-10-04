@@ -21,7 +21,7 @@ export class RoomController {
         ...(templateId ? {templateId} : {}),
       });
 
-      res.json(result); // ← ★共通で返す
+      res.json(result);
     } catch (error) {
       logger.error("Create room error:", error);
       const message =
