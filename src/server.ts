@@ -5,6 +5,10 @@ import cors from "cors";
 import {db} from "./infrastructure/config/firebase";
 import {logger} from "./infrastructure/logging/logger";
 import {errorHandler} from "./presentation/middleware/errorHandler";
+import dotenv from "dotenv";
+
+// Load environment variables from .env file
+dotenv.config();
 
 // Repositories
 import {FirebaseRoomRepository} from "./infrastructure/database/FirebaseRoomRepository";
@@ -23,7 +27,7 @@ import {RoomController} from "./presentation/controllers/RoomControllers";
 const app = express();
 
 // 🔧 CORS設定（Cloud Run対応）
-const allowedOrigins = ["https://sushi-peace.web.app", "http://localhost:5173"];
+const allowedOrigins = [process.env.PROD_URL!, process.env.DEV_URL!];
 const corsOptions = {
   origin: allowedOrigins,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
