@@ -1,4 +1,4 @@
-import { PlateTemplate } from '../entities/PlateTemplate';
+import {PlateTemplate} from "@/domain/entities/PlateTemplate";
 
 export interface TemplateRepository {
   findAll(): Promise<PlateTemplate[]>;

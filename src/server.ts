@@ -2,31 +2,31 @@ import express from "express";
 import {Server} from "socket.io";
 import http from "http";
 import cors from "cors";
-import {db} from "./infrastructure/config/firebase";
-import {logger} from "./infrastructure/logging/logger";
-import {errorHandler} from "./presentation/middleware/errorHandler";
+import {db} from "@/infrastructure/config/firebase";
+import {logger} from "@/infrastructure/logging/logger";
+import {errorHandler} from "@/presentation/middleware/errorHandler";
 import dotenv from "dotenv";
 
 // Load environment variables from .env file
 dotenv.config();
 
 // Repositories
-import {FirebaseRoomRepository} from "./infrastructure/database/FirebaseRoomRepository";
-import {InMemoryTemplateRepository} from "./infrastructure/memory/InMemoryTemplateRepository";
-import {InMemoryRoomStateRepository} from "./infrastructure/memory/InMemoryRoomStateRepository";
+import {FirebaseRoomRepository} from "@/infrastructure/database/FirebaseRoomRepository";
+import {InMemoryTemplateRepository} from "@/infrastructure/memory/InMemoryTemplateRepository";
+import {InMemoryRoomStateRepository} from "@/infrastructure/memory/InMemoryRoomStateRepository";
 
 // Use Cases
-import {CreateRoomUseCase} from "./application/usecases/CreateRoomUseCase";
-import {GetRoomUseCase} from "./application/usecases/GetRoomUseCase";
-import {UpdateCountUseCase} from "./application/usecases/UpdateCountUseCase";
+import {CreateRoomUseCase} from "@/application/usecases/CreateRoomUseCase";
+import {GetRoomUseCase} from "@/application/usecases/GetRoomUseCase";
+import {UpdateCountUseCase} from "@/application/usecases/UpdateCountUseCase";
 
 // Controllers
-import {SocketController} from "./presentation/controllers/SocketController";
-import {RoomController} from "./presentation/controllers/RoomControllers";
+import {SocketController} from "@/presentation/controllers/SocketController";
+import {RoomController} from "@/presentation/controllers/RoomControllers";
 
 const app = express();
 
-// 🔧 CORS設定（Cloud Run対応）
+// CORS設定（Cloud Run対応）
 const allowedOrigins = [process.env.PROD_URL!, process.env.DEV_URL!];
 const corsOptions = {
   origin: allowedOrigins,

@@ -1,4 +1,4 @@
-import { Room } from '../entities/Room';
+import {Room} from "@/domain/entities/Room";
 
 export interface RoomRepository {
   create(room: Room): Promise<void>;

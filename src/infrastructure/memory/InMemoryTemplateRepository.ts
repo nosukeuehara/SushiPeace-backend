@@ -1,5 +1,5 @@
-import { PlateTemplate } from '../../domain/entities/PlateTemplate';
-import { TemplateRepository } from '../../domain/repositories/TemplateRepository';
+import {PlateTemplate} from "@/domain/entities/PlateTemplate";
+import {TemplateRepository} from "@/domain/repositories/TemplateRepository";
 
 const PLATE_TEMPLATES: PlateTemplate[] = [
   {
@@ -28,6 +28,6 @@ export class InMemoryTemplateRepository implements TemplateRepository {
   }
 
   async findById(id: string): Promise<PlateTemplate | null> {
-    return PLATE_TEMPLATES.find(template => template.id === id) || null;
+    return PLATE_TEMPLATES.find((template) => template.id === id) || null;
   }
 }

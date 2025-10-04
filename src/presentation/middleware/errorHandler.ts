@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import { logger } from "../../infrastructure/logging/logger";
+import {Request, Response, NextFunction} from "express";
+import {logger} from "@/infrastructure/logging/logger";
 
 export function errorHandler(
   err: unknown,
@@ -9,5 +9,5 @@ export function errorHandler(
 ): void {
   const message = err instanceof Error ? err.message : "Internal server error";
   logger.error("Unhandled error:", err);
-  res.status(500).json({ error: message });
+  res.status(500).json({error: message});
 }

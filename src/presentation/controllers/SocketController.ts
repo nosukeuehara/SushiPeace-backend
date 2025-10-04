@@ -1,10 +1,10 @@
 import {Server, Socket} from "socket.io";
-import {RoomRepository} from "../../domain/repositories/RoomRepository";
-import {RoomStateRepository} from "../../domain/repositories/RoomStateRepository";
-import {UpdateCountUseCase} from "../../application/usecases/UpdateCountUseCase";
-import {RoomService} from "../../domain/services/RoomService";
-import {logger} from "../../infrastructure/logging/logger";
-import {Member} from "../../domain/entities/Room";
+import {RoomRepository} from "@/domain/repositories/RoomRepository";
+import {RoomStateRepository} from "@/domain/repositories/RoomStateRepository";
+import {UpdateCountUseCase} from "@/application/usecases/UpdateCountUseCase";
+import {RoomService} from "@/domain/services/RoomService";
+import {logger} from "@/infrastructure/logging/logger";
+import {Member} from "@/domain/entities/Room";
 
 export class SocketController {
   constructor(
