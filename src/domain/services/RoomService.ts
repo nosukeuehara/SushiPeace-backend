@@ -1,8 +1,10 @@
-import { Member } from '../entities/Room';
-import { PlateTemplate } from '../entities/PlateTemplate';
+import { Member } from "../entities/Room";
+import { PlateTemplate } from "../entities/PlateTemplate";
 
 export class RoomService {
-  static createInitialCounts(template: PlateTemplate | null): Record<string, number> {
+  static createInitialCounts(
+    template: PlateTemplate | null
+  ): Record<string, number> {
     if (!template) return {};
     return Object.keys(template.prices).reduce((acc, plate) => {
       acc[plate] = 0;
@@ -10,17 +12,17 @@ export class RoomService {
     }, {} as Record<string, number>);
   }
 
-
-  static isRoomExpired(createdAt: Date, hoursLimit: number = 24 * 30): boolean {
-    const now = new Date();
+  static isRoomExpired(
+    createdAt: Date,
+    hoursLimit: number = 24 * 30,
+    now: Date = new Date()
+  ): boolean {
     const limitMs = hoursLimit * 60 * 60 * 1000;
     return now.getTime() - createdAt.getTime() > limitMs;
   }
 
   static membersToRecord(members: Member[]): Record<string, Member> {
-    return Object.fromEntries(
-      members.map(member => [member.userId, member])
-    );
+    return Object.fromEntries(members.map((member) => [member.userId, member]));
   }
 
   static recordToMembers(record: Record<string, Member>): Member[] {
