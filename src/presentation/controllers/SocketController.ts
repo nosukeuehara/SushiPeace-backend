@@ -1,10 +1,13 @@
-import {Server, Socket} from "socket.io";
-import {RoomRepository} from "../../domain/repositories/RoomRepository";
-import {RoomStateRepository} from "../../domain/repositories/RoomStateRepository";
-import {UpdateCountUseCase} from "../../application/usecases/UpdateCountUseCase";
-import {RoomService} from "../../domain/services/RoomService";
-import {logger} from "../../infrastructure/logging/logger";
-import {Member} from "../../domain/entities/Room";
+import { Server, Socket } from "socket.io";
+import { RoomRepository } from "../../domain/repositories/RoomRepository";
+import { RoomStateRepository } from "../../domain/repositories/RoomStateRepository";
+import { UpdateCountUseCase } from "../../application/usecases/UpdateCountUseCase";
+import { RoomService } from "../../domain/services/RoomService";
+import { logger } from "../../infrastructure/logging/logger";
+import { Member } from "../../domain/entities/Room";
+
+// TODO: コントローラーの責務が大きくなりすぎてるので、分割や整理を検討
+// ドメイン層を跨いでるのが気になる
 
 export class SocketController {
   constructor(
@@ -14,15 +17,15 @@ export class SocketController {
   ) {}
 
   handleConnection(io: Server, socket: Socket): void {
-    socket.on("join", async ({roomId, userId}) => {
+    socket.on("join", async ({ roomId, userId }) => {
       await this.handleJoin(io, socket, roomId, userId);
     });
 
-    socket.on("count", async ({roomId, userId, color, remove}) => {
+    socket.on("count", async ({ roomId, userId, color, remove }) => {
       await this.handleCount(io, roomId, userId, color, remove);
     });
 
-    socket.on("updateTemplate", async ({roomId, prices}) => {
+    socket.on("updateTemplate", async ({ roomId, prices }) => {
       const room = await this.roomRepository.findById(roomId);
       if (!room) return;
 
