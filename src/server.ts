@@ -17,12 +17,13 @@ import {InMemoryRoomStateRepository} from "@/infrastructure/memory/InMemoryRoomS
 
 // Use Cases
 import {CreateRoomUseCase} from "@/application/usecases/CreateRoomUseCase";
-import {GetRoomUseCase} from "@/application/usecases/GetRoomUseCase";
+import {RoomUseCase} from "@/application/usecases/RoomUseCase";
 import {UpdateCountUseCase} from "@/application/usecases/UpdateCountUseCase";
 
 // Controllers
 import {SocketController} from "@/presentation/controllers/SocketController";
 import {RoomController} from "@/presentation/controllers/RoomControllers";
+import {GetTemplateUseCase} from "./application/usecases/GetTemplateUseCase";
 
 const app = express();
 
@@ -63,23 +64,20 @@ const createRoomUseCase = new CreateRoomUseCase(
   templateRepository,
   roomStateRepository
 );
-const getRoomUseCase = new GetRoomUseCase(roomRepository);
+const roomUseCase = new RoomUseCase(roomRepository, roomStateRepository);
 const updateCountUseCase = new UpdateCountUseCase(
   roomRepository,
   roomStateRepository
 );
+const getTemplateUseCase = new GetTemplateUseCase(templateRepository);
 
 // Controllers
 const roomController = new RoomController(
   createRoomUseCase,
-  getRoomUseCase,
-  templateRepository
+  roomUseCase,
+  getTemplateUseCase
 );
-const socketController = new SocketController(
-  roomRepository,
-  roomStateRepository,
-  updateCountUseCase
-);
+const socketController = new SocketController(updateCountUseCase, roomUseCase);
 
 // Routes
 app.post("/api/room", (req, res) => roomController.createRoom(req, res));

@@ -1,14 +1,14 @@
 import {Request, Response} from "express";
 import {CreateRoomUseCase} from "@/application/usecases/CreateRoomUseCase";
-import {GetRoomUseCase} from "@/application/usecases/GetRoomUseCase";
-import {TemplateRepository} from "@/domain/repositories/TemplateRepository";
+import {RoomUseCase} from "@/application/usecases/RoomUseCase";
 import {logger} from "@/infrastructure/logging/logger";
+import {GetTemplateUseCase} from "@/application/usecases/GetTemplateUseCase";
 
 export class RoomController {
   constructor(
     private createRoomUseCase: CreateRoomUseCase,
-    private getRoomUseCase: GetRoomUseCase,
-    private templateRepository: TemplateRepository
+    private getRoomUseCase: RoomUseCase,
+    private getTemplateUseCase: GetTemplateUseCase
   ) {}
 
   async createRoom(req: Request, res: Response): Promise<void> {
@@ -35,7 +35,7 @@ export class RoomController {
   async getRoom(req: Request, res: Response): Promise<void> {
     try {
       const {roomId} = req.params;
-      const room = await this.getRoomUseCase.execute(roomId);
+      const room = await this.getRoomUseCase.getRoom(roomId);
       res.json(room);
     } catch (error) {
       logger.error("Get room error:", error);
@@ -54,7 +54,7 @@ export class RoomController {
 
   async getTemplates(req: Request, res: Response): Promise<void> {
     try {
-      const templates = await this.templateRepository.findAll();
+      const templates = await this.getTemplateUseCase.execute();
       res.json(templates);
     } catch (error) {
       logger.error("Get templates error:", error);

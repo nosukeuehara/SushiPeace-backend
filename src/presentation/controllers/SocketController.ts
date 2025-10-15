@@ -1,17 +1,15 @@
 import {Server, Socket} from "socket.io";
-import {RoomRepository} from "@/domain/repositories/RoomRepository";
-import {RoomStateRepository} from "@/domain/repositories/RoomStateRepository";
 import {UpdateCountUseCase} from "@/application/usecases/UpdateCountUseCase";
 import {RoomService} from "@/domain/services/RoomService";
 import {logger} from "@/infrastructure/logging/logger";
 import {Member} from "@/domain/entities/Room";
 import {CountEvent, JoinEvent, UpdateTemplateEvent} from "@/shared";
+import {RoomUseCase} from "@/application/usecases/RoomUseCase";
 
 export class SocketController {
   constructor(
-    private roomRepository: RoomRepository,
-    private roomStateRepository: RoomStateRepository,
-    private updateCountUseCase: UpdateCountUseCase
+    private updateCountUseCase: UpdateCountUseCase,
+    private roomUseCase: RoomUseCase
   ) {}
 
   handleConnection(io: Server, socket: Socket): void {
@@ -26,7 +24,7 @@ export class SocketController {
     socket.on(
       "updateTemplate",
       async ({roomId, prices}: UpdateTemplateEvent) => {
-        const room = await this.roomRepository.findById(roomId);
+        const room = await this.roomUseCase.getRoom(roomId);
         if (!room) return;
 
         const rawTemplate = prices ?? {};
@@ -39,7 +37,7 @@ export class SocketController {
         >;
         const validColors = Object.keys(newTemplate);
 
-        const roomState = this.roomStateRepository.getRoomState(roomId);
+        const roomState = await this.roomUseCase.getRoomState(roomId);
         let members: Member[];
 
         if (roomState) {
@@ -50,7 +48,7 @@ export class SocketController {
               )
             );
           });
-          this.roomStateRepository.setRoomState(roomId, roomState);
+          this.roomUseCase.setRoomState(roomId, roomState);
           members = RoomService.recordToMembers(roomState);
         } else {
           members = room.members.map((m) => ({
@@ -70,7 +68,7 @@ export class SocketController {
           members,
         };
 
-        await this.roomRepository.update(room.id, updatedRoom);
+        await this.roomUseCase.update(room.id, updatedRoom);
 
         io.to(roomId).emit("sync", {
           members,
@@ -87,17 +85,17 @@ export class SocketController {
     userId: string
   ): Promise<void> {
     try {
-      const room = await this.roomRepository.findById(roomId);
+      const room = await this.roomUseCase.getRoom(roomId);
       if (!room) return;
 
-      if (!this.roomStateRepository.getRoomState(roomId)) {
+      if (!this.roomUseCase.getRoomState(roomId)) {
         const membersRecord = RoomService.membersToRecord(room.members);
-        this.roomStateRepository.setRoomState(roomId, membersRecord);
+        this.roomUseCase.setRoomState(roomId, membersRecord);
       }
 
       socket.join(roomId);
 
-      const roomState = this.roomStateRepository.getRoomState(roomId);
+      const roomState = await this.roomUseCase.getRoomState(roomId);
       if (!roomState) return;
       const members = RoomService.recordToMembers(roomState);
       io.to(roomId).emit("sync", {
@@ -124,7 +122,7 @@ export class SocketController {
         remove,
       });
 
-      const room = await this.roomRepository.findById(roomId);
+      const room = await this.roomUseCase.getRoom(roomId);
       const templateId = room?.templateId ?? "";
 
       io.to(roomId).emit("sync", {
