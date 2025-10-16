@@ -96,9 +96,10 @@ io.on("connection", (socket) => {
 const PORT =
   Number(process.env.PORT) ||
   (process.env.NODE_ENV === "production" ? 8080 : 3000);
-server.listen(PORT, () => {
-  logger.info(`🚀 Server running at http://localhost:${PORT}`);
-});
+const HOST = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+server.listen(PORT, HOST, () =>
+  logger.info(`🚀 Server running at http://${HOST}:${PORT}`)
+);
 
 process.on("uncaughtException", (err) => {
   logger.error("Uncaught exception:", err);
