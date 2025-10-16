@@ -28,9 +28,7 @@ import {GetTemplateUseCase} from "./application/usecases/GetTemplateUseCase";
 const app = express();
 
 // CORS設定（Cloud Run対応）
-const allowedOrigins = [process.env.PROD_URL, process.env.DEV_URL].filter(
-  (v): v is string => !!v
-);
+const allowedOrigins = [process.env.DEV_URL].filter((v): v is string => !!v);
 const corsOptions = {
   origin: allowedOrigins.length ? allowedOrigins : true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
