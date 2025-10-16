@@ -13,9 +13,17 @@ export class SocketController {
   ) {}
 
   handleConnection(io: Server, socket: Socket): void {
-    socket.on("join", async ({roomId, userId}: JoinEvent) => {
-      await this.handleJoin(io, socket, roomId, userId);
-    });
+    socket.on(
+      "join",
+      async ({roomId, userId}, ack: (res: {ok: boolean}) => void) => {
+        try {
+          await this.handleJoin(io, socket, roomId, userId);
+          ack({ok: true});
+        } catch {
+          ack({ok: false});
+        }
+      }
+    );
 
     socket.on("count", async ({roomId, userId, color, remove}: CountEvent) => {
       await this.handleCount(io, roomId, userId, color, remove);
@@ -88,7 +96,8 @@ export class SocketController {
       const room = await this.roomUseCase.getRoom(roomId);
       if (!room) return;
 
-      if (!this.roomUseCase.getRoomState(roomId)) {
+      let state = await this.roomUseCase.getRoomState(roomId);
+      if (state !== null) {
         const membersRecord = RoomService.membersToRecord(room.members);
         this.roomUseCase.setRoomState(roomId, membersRecord);
       }
