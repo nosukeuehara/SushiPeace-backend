@@ -100,10 +100,6 @@ const PORT =
   (process.env.NODE_ENV === "production" ? 8080 : 3000);
 const HOST = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
 
-logger.info(
-  `Booting... NODE_ENV=${process.env.NODE_ENV} PORT=${PORT} HOST=${HOST}`
-);
-
 server.listen(PORT, HOST, () =>
   logger.info(`🚀 Server running at http://${HOST}:${PORT}`)
 );
