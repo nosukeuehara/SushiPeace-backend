@@ -54,7 +54,7 @@ export class RoomController {
 
   async getTemplates(req: Request, res: Response): Promise<void> {
     try {
-      const templates = await this.getTemplateUseCase.execute();
+      const templates = await this.getTemplateUseCase.findAll();
       res.json(templates);
     } catch (error) {
       logger.error("Get templates error:", error);
