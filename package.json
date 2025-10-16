@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "ts-node-dev -r tsconfig-paths/register src/server.ts",
     "build": "tsc",
-    "start": "node -r tsconfig-paths/register dist/server.js"
+    "start": "node -r tsconfig-paths/register dist/server.js",
+    "gcp-build": "npm run build"
   },
   "keywords": [],
   "author": "",
@@ -17,7 +18,8 @@
     "express": "^5.1.0",
     "firebase-admin": "^13.4.0",
     "nanoid": "^5.1.5",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "tsconfig-paths": "^4.2.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
