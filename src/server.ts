@@ -2,28 +2,33 @@ import express from "express";
 import {Server} from "socket.io";
 import http from "http";
 import cors from "cors";
-import {db} from "./infrastructure/config/firebase";
-import {logger} from "./infrastructure/logging/logger";
-import {errorHandler} from "./presentation/middleware/errorHandler";
+import {db} from "@/infrastructure/config/firebase";
+import {logger} from "@/infrastructure/logging/logger";
+import {errorHandler} from "@/presentation/middleware/errorHandler";
+import dotenv from "dotenv";
+
+// Load environment variables from .env file
+dotenv.config();
 
 // Repositories
-import {FirebaseRoomRepository} from "./infrastructure/database/FirebaseRoomRepository";
-import {InMemoryTemplateRepository} from "./infrastructure/memory/InMemoryTemplateRepository";
-import {InMemoryRoomStateRepository} from "./infrastructure/memory/InMemoryRoomStateRepository";
+import {FirebaseRoomRepository} from "@/infrastructure/database/FirebaseRoomRepository";
+import {InMemoryTemplateRepository} from "@/infrastructure/memory/InMemoryTemplateRepository";
+import {InMemoryRoomStateRepository} from "@/infrastructure/memory/InMemoryRoomStateRepository";
 
 // Use Cases
-import {CreateRoomUseCase} from "./application/usecases/CreateRoomUseCase";
-import {GetRoomUseCase} from "./application/usecases/GetRoomUseCase";
-import {UpdateCountUseCase} from "./application/usecases/UpdateCountUseCase";
+import {CreateRoomUseCase} from "@/application/usecases/CreateRoomUseCase";
+import {RoomUseCase} from "@/application/usecases/RoomUseCase";
+import {UpdateCountUseCase} from "@/application/usecases/UpdateCountUseCase";
 
 // Controllers
-import {SocketController} from "./presentation/controllers/SocketController";
-import {RoomController} from "./presentation/controllers/RoomControllers";
+import {SocketController} from "@/presentation/controllers/SocketController";
+import {RoomController} from "@/presentation/controllers/RoomControllers";
+import {GetTemplateUseCase} from "./application/usecases/GetTemplateUseCase";
 
 const app = express();
 
-// 🔧 CORS設定（Cloud Run対応）
-const allowedOrigins = ["https://sushi-peace.web.app", "http://localhost:5173"];
+// CORS設定（Cloud Run対応）
+const allowedOrigins = [process.env.PROD_URL!, process.env.DEV_URL!];
 const corsOptions = {
   origin: allowedOrigins,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -59,23 +64,20 @@ const createRoomUseCase = new CreateRoomUseCase(
   templateRepository,
   roomStateRepository
 );
-const getRoomUseCase = new GetRoomUseCase(roomRepository);
+const roomUseCase = new RoomUseCase(roomRepository, roomStateRepository);
 const updateCountUseCase = new UpdateCountUseCase(
   roomRepository,
   roomStateRepository
 );
+const getTemplateUseCase = new GetTemplateUseCase(templateRepository);
 
 // Controllers
 const roomController = new RoomController(
   createRoomUseCase,
-  getRoomUseCase,
-  templateRepository
+  roomUseCase,
+  getTemplateUseCase
 );
-const socketController = new SocketController(
-  roomRepository,
-  roomStateRepository,
-  updateCountUseCase
-);
+const socketController = new SocketController(updateCountUseCase, roomUseCase);
 
 // Routes
 app.post("/api/room", (req, res) => roomController.createRoom(req, res));
