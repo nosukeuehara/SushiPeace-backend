@@ -13,7 +13,7 @@ dotenv.config();
 // Repositories
 import {FirebaseRoomRepository} from "@/infrastructure/database/FirebaseRoomRepository";
 import {InMemoryTemplateRepository} from "@/infrastructure/memory/InMemoryTemplateRepository";
-import {InMemoryRoomStateRepository} from "@/infrastructure/memory/InMemoryRoomStateRepository";
+// import {InMemoryRoomStateRepository} from "@/infrastructure/memory/InMemoryRoomStateRepository";
 
 // Use Cases
 import {CreateRoomUseCase} from "@/application/usecases/CreateRoomUseCase";
@@ -24,6 +24,7 @@ import {UpdateCountUseCase} from "@/application/usecases/UpdateCountUseCase";
 import {SocketController} from "@/presentation/controllers/SocketController";
 import {RoomController} from "@/presentation/controllers/RoomControllers";
 import {GetTemplateUseCase} from "./application/usecases/GetTemplateUseCase";
+import {FirebaseRoomStateRepository} from "./infrastructure/database/FirebaseRoomStateRepository";
 
 const app = express();
 
@@ -55,8 +56,8 @@ const io = new Server(server, {
 
 // Dependencies
 const roomRepository = new FirebaseRoomRepository(db);
+const roomStateRepository = new FirebaseRoomStateRepository(db);
 const templateRepository = new InMemoryTemplateRepository();
-const roomStateRepository = new InMemoryRoomStateRepository();
 
 // Use Cases
 const createRoomUseCase = new CreateRoomUseCase(
@@ -93,10 +94,11 @@ io.on("connection", (socket) => {
 });
 
 // 起動
-const PORT =
+export const PORT =
   Number(process.env.PORT) ||
   (process.env.NODE_ENV === "production" ? 8080 : 3000);
-const HOST = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+export const HOST =
+  process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
 
 server.listen(PORT, HOST, () =>
   logger.info(`🚀 Server running at http://${HOST}:${PORT}`)

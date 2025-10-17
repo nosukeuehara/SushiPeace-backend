@@ -9,6 +9,8 @@ import {
   CreateRoomResponseDto,
 } from "@/application/dto/CreateRoomDto";
 
+const HOST = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+
 export class CreateRoomUseCase {
   constructor(
     private roomRepository: RoomRepository,
@@ -43,7 +45,7 @@ export class CreateRoomUseCase {
 
     return {
       roomId,
-      shareUrl: `http://localhost:3000/group/${roomId}`,
+      shareUrl: `http://${HOST}/group/${roomId}`,
     };
   }
 }

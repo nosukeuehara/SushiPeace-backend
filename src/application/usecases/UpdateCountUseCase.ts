@@ -11,7 +11,7 @@ export class UpdateCountUseCase {
   ) {}
 
   async execute(dto: UpdateCountDto): Promise<Member[]> {
-    const roomState = this.roomStateRepository.getRoomState(dto.roomId);
+    const roomState = await this.roomStateRepository.getRoomState(dto.roomId);
     if (!roomState || !roomState[dto.userId]) {
       throw new Error("ユーザーまたはルームが存在しません");
     }
