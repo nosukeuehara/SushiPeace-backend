@@ -29,9 +29,9 @@ import {FirebaseRoomStateRepository} from "./infrastructure/database/FirebaseRoo
 const app = express();
 
 // CORS設定（Cloud Run対応）
-const allowedOrigins = [process.env.DEV_URL].filter((v): v is string => !!v);
+const allowedOrigins = [process.env.PROD_URL!, process.env.DEV_URL!];
 const corsOptions = {
-  origin: allowedOrigins.length ? allowedOrigins : true,
+  origin: allowedOrigins,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type"],
 };
