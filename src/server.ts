@@ -101,7 +101,11 @@ export const HOST =
   process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
 
 server.listen(PORT, HOST, () =>
-  logger.info(`🚀 Server running at http://${HOST}:${PORT}`)
+  logger.info(
+    `🚀 Server running at ${
+      process.env.NODE_ENV === "production" ? "https" : "http"
+    }://${HOST}:${PORT}`
+  )
 );
 
 process.on("uncaughtException", (err) => {
