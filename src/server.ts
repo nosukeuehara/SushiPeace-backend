@@ -29,7 +29,7 @@ import {FirebaseRoomStateRepository} from "./infrastructure/database/FirebaseRoo
 const app = express();
 
 // CORS設定（Cloud Run対応）
-const allowedOrigins = [process.env.PROD_URL!, process.env.DEV_URL!];
+const allowedOrigins = ["https://sushi-peace.web.app", "http://localhost:5173"];
 const corsOptions = {
   origin: allowedOrigins,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
