@@ -12,7 +12,6 @@ export class FirebaseRoomRepository implements RoomRepository {
       .set({
         groupName: room.groupName,
         members: room.members,
-        templateId: room.templateId,
         templateData: room.templateData ?? {},
         createdAt: room.createdAt,
       });
@@ -27,7 +26,6 @@ export class FirebaseRoomRepository implements RoomRepository {
       id,
       groupName: data.groupName,
       members: data.members || [],
-      templateId: data.templateId,
       templateData: data.templateData ?? {},
       createdAt: data.createdAt?.toDate?.() || new Date(),
     };

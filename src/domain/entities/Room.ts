@@ -2,11 +2,9 @@ export interface Room {
   id: string;
   groupName: string;
   members: Member[];
-  templateId: string;
   templateData?: Record<string, number>;
   createdAt: Date;
 }
-
 
 export interface Member {
   userId: string;

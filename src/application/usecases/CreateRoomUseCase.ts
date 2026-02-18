@@ -19,11 +19,6 @@ export class CreateRoomUseCase {
   ) {}
 
   async execute(dto: CreateRoomDto): Promise<CreateRoomResponseDto> {
-    const templateId = dto.templateId || "";
-    const template = templateId
-      ? await this.templateRepository.findById(templateId)
-      : null;
-
     // countsをテンプレートがある場合は生成、ない場合は空の配列やオブジェクトを返すようにサービス側を修正
     const roomId = nanoid();
     const room: Room = {
@@ -32,20 +27,19 @@ export class CreateRoomUseCase {
       members: dto.members.map((m) => ({
         userId: m.userId,
         name: m.name,
-        counts: RoomService.createInitialCounts(template), // null対応
+        counts: RoomService.createInitialCounts(null), // null対応
       })),
-      templateId: templateId || "", // 空文字を許容
       createdAt: new Date(),
     };
 
     await this.roomRepository.create(room);
 
     const membersRecord = RoomService.membersToRecord(room.members);
-    this.roomStateRepository.setRoomState(roomId, membersRecord);
+    await this.roomStateRepository.setRoomState(roomId, membersRecord);
 
     return {
       roomId,
-      shareUrl: `http://${HOST}/group/${roomId}`,
+      shareUrl: `https://${HOST}/group/${roomId}`,
     };
   }
 }

@@ -13,12 +13,11 @@ export class RoomController {
 
   async createRoom(req: Request, res: Response): Promise<void> {
     try {
-      const {groupName, members, templateId} = req.body;
+      const {groupName, members} = req.body;
 
       const result = await this.createRoomUseCase.execute({
         groupName,
         members,
-        ...(templateId ? {templateId} : {}),
       });
 
       res.json(result);
@@ -46,8 +45,8 @@ export class RoomController {
       const status = message.includes("存在しません")
         ? 404
         : message.includes("期限切れ")
-        ? 410
-        : 500;
+          ? 410
+          : 500;
       res.status(status).json({error: message});
     }
   }

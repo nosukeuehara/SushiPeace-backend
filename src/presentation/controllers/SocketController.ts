@@ -13,17 +13,14 @@ export class SocketController {
   ) {}
 
   handleConnection(io: Server, socket: Socket): void {
-    socket.on(
-      "join",
-      async ({roomId, userId}, ack: (res: {ok: boolean}) => void) => {
-        try {
-          await this.handleJoin(io, socket, roomId, userId);
-          ack({ok: true});
-        } catch {
-          ack({ok: false});
-        }
+    socket.on("join", async ({roomId}, ack: (res: {ok: boolean}) => void) => {
+      try {
+        await this.handleJoin(io, socket, roomId);
+        ack({ok: true});
+      } catch {
+        ack({ok: false});
       }
-    );
+    });
 
     socket.on("count", async ({roomId, userId, color, remove}: CountEvent) => {
       await this.handleCount(io, roomId, userId, color, remove);
@@ -56,7 +53,7 @@ export class SocketController {
               )
             );
           });
-          this.roomUseCase.setRoomState(roomId, roomState);
+          await this.roomUseCase.setRoomState(roomId, roomState);
           members = RoomService.recordToMembers(roomState);
         } else {
           members = room.members.map((m) => ({
@@ -71,7 +68,6 @@ export class SocketController {
 
         const updatedRoom = {
           ...room,
-          templateId: validColors.length > 0 ? room.templateId : "",
           templateData: validColors.length > 0 ? newTemplate : {},
           members,
         };
@@ -89,8 +85,7 @@ export class SocketController {
   private async handleJoin(
     io: Server,
     socket: Socket,
-    roomId: string,
-    userId: string
+    roomId: string
   ): Promise<void> {
     try {
       const room = await this.roomUseCase.getRoom(roomId);
@@ -99,7 +94,7 @@ export class SocketController {
       let state = await this.roomUseCase.getRoomState(roomId);
       if (state !== null) {
         const membersRecord = RoomService.membersToRecord(room.members);
-        this.roomUseCase.setRoomState(roomId, membersRecord);
+        await this.roomUseCase.setRoomState(roomId, membersRecord);
       }
 
       socket.join(roomId);
@@ -132,11 +127,9 @@ export class SocketController {
       });
 
       const room = await this.roomUseCase.getRoom(roomId);
-      const templateId = room?.templateId ?? "";
 
       io.to(roomId).emit("sync", {
         members: updatedMembers,
-        templateId,
       });
     } catch (error) {
       logger.error("Count update error:", error);
