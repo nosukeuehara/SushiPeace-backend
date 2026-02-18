@@ -22,8 +22,19 @@ export class SocketController {
       }
     });
 
-    socket.on("count", async ({roomId, userId, color, remove}: CountEvent) => {
-      await this.handleCount(io, roomId, userId, color, remove);
+    socket.on("count", async ({roomId, userId, color, delta, seq}) => {
+      const updatedMembers = await this.updateCountUseCase.execute({
+        roomId,
+        userId,
+        color,
+        delta,
+      });
+
+      io.to(roomId).emit("sync", {
+        members: updatedMembers,
+        templateData: null,
+        meta: {sourceUserId: userId, sourceSeq: seq},
+      });
     });
 
     socket.on(
@@ -72,11 +83,17 @@ export class SocketController {
           members,
         };
 
+        await this.roomUseCase.setRoomState(
+          roomId,
+          RoomService.membersToRecord(members)
+        );
+
         await this.roomUseCase.update(room.id, updatedRoom);
 
         io.to(roomId).emit("sync", {
           members,
           templateData: updatedRoom.templateData ?? {},
+          meta: null,
         });
       }
     );
@@ -92,7 +109,7 @@ export class SocketController {
       if (!room) return;
 
       let state = await this.roomUseCase.getRoomState(roomId);
-      if (state !== null) {
+      if (state === null) {
         const membersRecord = RoomService.membersToRecord(room.members);
         await this.roomUseCase.setRoomState(roomId, membersRecord);
       }
@@ -105,34 +122,10 @@ export class SocketController {
       io.to(roomId).emit("sync", {
         members,
         templateData: room.templateData ?? {},
+        meta: null,
       });
     } catch (error) {
       logger.error("Join error:", error);
-    }
-  }
-
-  private async handleCount(
-    io: Server,
-    roomId: string,
-    userId: string,
-    color: string,
-    remove: boolean
-  ): Promise<void> {
-    try {
-      const updatedMembers = await this.updateCountUseCase.execute({
-        roomId,
-        userId,
-        color,
-        remove,
-      });
-
-      const room = await this.roomUseCase.getRoom(roomId);
-
-      io.to(roomId).emit("sync", {
-        members: updatedMembers,
-      });
-    } catch (error) {
-      logger.error("Count update error:", error);
     }
   }
 }

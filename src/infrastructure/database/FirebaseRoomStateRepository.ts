@@ -48,7 +48,7 @@ export class FirebaseRoomStateRepository implements RoomStateRepository {
     userId: string,
     color: string,
     count: number
-  ): Promise<void> {
+  ): Promise<Record<string, Member> | void> {
     try {
       const state = await this.getRoomState(roomId);
       if (!state) return;
@@ -59,6 +59,8 @@ export class FirebaseRoomStateRepository implements RoomStateRepository {
 
       state[userId].counts[color] = count;
       await this.setRoomState(roomId, state);
+
+      return state;
     } catch (error) {
       console.error(
         "[FirestoreRoomStateRepository] updateMemberCount error:",

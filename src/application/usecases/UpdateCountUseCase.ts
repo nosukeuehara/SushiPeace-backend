@@ -18,17 +18,20 @@ export class UpdateCountUseCase {
 
     // カウント更新
     const currentCount = roomState[dto.userId].counts[dto.color] ?? 0;
-    const newCount = currentCount + (dto.remove ? -1 : 1);
+    const newCount = Math.max(0, currentCount + dto.delta);
 
-    this.roomStateRepository.updateMemberCount(
+    const updatedRoomState = await this.roomStateRepository.updateMemberCount(
       dto.roomId,
       dto.userId,
       dto.color,
       newCount
     );
 
+    if (!updatedRoomState) {
+      throw new Error("ルームの状態を更新できませんでした");
+    }
     // Firestoreに反映
-    const updatedMembers = RoomService.recordToMembers(roomState);
+    const updatedMembers = RoomService.recordToMembers(updatedRoomState);
     await this.roomRepository.update(dto.roomId, {members: updatedMembers});
 
     return updatedMembers;

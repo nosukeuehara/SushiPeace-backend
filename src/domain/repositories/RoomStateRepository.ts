@@ -8,5 +8,5 @@ export interface RoomStateRepository {
     userId: string,
     color: string,
     count: number
-  ): Promise<void>;
+  ): Promise<Record<string, Member> | void>;
 }
