@@ -1,7 +1,6 @@
 import {nanoid} from "nanoid";
 import {Room} from "@/domain/entities/Room";
 import {RoomRepository} from "@/domain/repositories/RoomRepository";
-import {TemplateRepository} from "@/domain/repositories/TemplateRepository";
 import {RoomStateRepository} from "@/domain/repositories/RoomStateRepository";
 import {RoomService} from "@/domain/services/RoomService";
 import {
@@ -14,7 +13,6 @@ const HOST = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
 export class CreateRoomUseCase {
   constructor(
     private roomRepository: RoomRepository,
-    private templateRepository: TemplateRepository,
     private roomStateRepository: RoomStateRepository
   ) {}
 

@@ -62,7 +62,6 @@ const templateRepository = new InMemoryTemplateRepository();
 // Use Cases
 const createRoomUseCase = new CreateRoomUseCase(
   roomRepository,
-  templateRepository,
   roomStateRepository
 );
 const roomUseCase = new RoomUseCase(roomRepository, roomStateRepository);
